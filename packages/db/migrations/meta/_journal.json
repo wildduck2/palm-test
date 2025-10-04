@@ -29,6 +29,13 @@
       "when": 1759511844563,
       "tag": "0003_fantastic_patch",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1759530970261,
+      "tag": "0004_remarkable_eternity",
+      "breakpoints": true
     }
   ]
 }

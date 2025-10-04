@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { ScheduleModule } from '@nestjs/schedule'
 import { AccessTokensModule } from './access-tokens'
+import { AnalyticsModule } from './analytics'
+import { CronService } from './app.service'
 import { AuthModule } from './auth'
 import { DrizzleModule } from './drizzle'
 import { EmailModule } from './email'
@@ -16,6 +19,7 @@ import { ServicesModule } from './services'
       envFilePath: '.env',
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     LoggerModule,
     DrizzleModule,
     RedisModule,
@@ -24,7 +28,8 @@ import { ServicesModule } from './services'
     AuthModule,
     AccessTokensModule,
     ServicesModule,
+    AnalyticsModule,
   ],
-  providers: [],
+  providers: [CronService],
 })
 export class AppModule {}

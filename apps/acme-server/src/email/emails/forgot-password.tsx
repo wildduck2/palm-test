@@ -12,15 +12,16 @@ import {
   verifyText,
 } from './css'
 
-export interface ForgotPasswordEmailProps {
-  code?: string
+export interface TokenExpiryEmailProps {
+  tokenId?: string
+  expiresAt?: string // ISO string or formatted date
 }
 
-export function ForgotPasswordEmail({ code }: ForgotPasswordEmailProps) {
+export function TokenExpiryEmail({ tokenId, expiresAt }: TokenExpiryEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>The acme platform that helps you uncover qualified leads.</Preview>
+      <Preview>Your access token is about to expire soon</Preview>
       <Body style={main}>
         <Container style={container}>
           <Img
@@ -32,18 +33,19 @@ export function ForgotPasswordEmail({ code }: ForgotPasswordEmailProps) {
           />
 
           <Section style={btnContainer}>
-            <Heading style={h1}>Reset your acme password</Heading>
+            <Heading style={h1}>Your Access Token is Expiring</Heading>
             <Text style={paragraph}>
-              We received a request to reset the password for your acme account. Please enter the following verification
-              code when prompted. If you didn&apos;t request a password reset, you can safely ignore this message.
+              This is a reminder that your access token will expire soon. Please renew it to ensure uninterrupted access
+              to your account and services.
             </Text>
-            <Section style={{ placeContent: 'center', ...verificationSection }}>
-              <Text style={verifyText}>Reset code</Text>
 
-              <Text style={codeText}>{code}</Text>
-              <Text style={validityText}>(This code is valid for 10 minutes)</Text>
+            <Section style={{ placeContent: 'center', ...verificationSection }}>
+              <Text style={verifyText}>Token ID</Text>
+              <Text style={codeText}>{tokenId}</Text>
+              <Text style={validityText}>Expires at: {expiresAt ? new Date(expiresAt).toLocaleString() : 'N/A'}</Text>
             </Section>
           </Section>
+
           <Hr />
 
           <Text style={paragraph}>
@@ -57,4 +59,4 @@ export function ForgotPasswordEmail({ code }: ForgotPasswordEmailProps) {
   )
 }
 
-export default ForgotPasswordEmail
+export default TokenExpiryEmail

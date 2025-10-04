@@ -85,7 +85,7 @@ function SelectWrapper({
         value,
         wrapperRef,
       }}>
-      <div {...props} duck-select="" ref={wrapperRef}>
+      <div {...props} data-slot="select" duck-select="" ref={wrapperRef}>
         {children}
       </div>
     </SelectContext.Provider>
@@ -126,6 +126,7 @@ function SelectTrigger({
     <PopoverTrigger
       {...props}
       className={cn(buttonVariants({ variant: 'outline' }), 'w-full justify-between text-base', className)}
+      data-slot="select-trigger"
       duck-select-trigger=""
       ref={triggerRef as never}>
       {children}
@@ -141,11 +142,13 @@ function SelectContent({ children, className, ...props }: React.ComponentPropsWi
   return (
     <PopoverContent
       className={cn('w-auto px-1.5 [&>div]:w-full', scrollable ? 'py-0' : 'py-1', className)}
+      data-slot="select-content"
       duck-select-content=""
       {...props}>
       {scrollable && <SelectScrollUpButton />}
       <div
         className={cn(scrollable && 'max-h-[450px] overflow-y-scroll')}
+        data-slot="select-content-scrollable"
         duck-select-content-scrollable=""
         ref={contentRef as never}>
         {children}
@@ -159,19 +162,18 @@ function SelectGroup({ children, ...props }: React.HTMLProps<HTMLUListElement>) 
   return <ul {...props}>{children}</ul>
 }
 
-function SelectValue({ placeholder, className, ...props }: React.HTMLProps<HTMLDivElement>) {
-  const { value, selectedItem } = useSelectContext()
-  const label = selectedItem?.textContent || value
-
+function SelectValue({ className, children, placeholder, ...props }: React.HTMLProps<HTMLDivElement>) {
+  const { value } = useSelectContext()
   return (
     <div
       className={cn(
-        'relative flex select-none items-center gap-2 truncate rounded-xs text-base outline-hidden',
+        'relative flex select-none items-center gap-2 truncate rounded-xs text-sm outline-hidden',
         className,
       )}
       {...props}
+      data-slot="select-value"
       duck-select-value="">
-      {label ? label : <span className="text-muted-foreground">{placeholder}</span>}
+      {value.length > 0 ? value : <span className="text-muted-foreground">{placeholder}</span>}
     </div>
   )
 }
@@ -183,6 +185,7 @@ function SelectLabel({ htmlFor, children, className, ref, ...props }: React.HTML
       htmlFor={htmlFor}
       ref={ref}
       {...props}
+      data-slot="select-label"
       duck-select-label="">
       {children}
     </label>
@@ -201,24 +204,28 @@ function SelectItem({
   const id = React.useId()
 
   return (
+    // biome-ignore lint: false positive
     <li
       aria-haspopup="dialog"
       id={id}
       popoverTarget={id}
       popoverTargetAction="hide"
       ref={ref}
+      // biome-ignore lint: false positive
+      role="checkbox"
       {...props}
       aria-disabled={disabled}
       className={cn(
-        "relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1 text-base outline-hidden transition-color duration-300 will-change-300 hover:bg-muted hover:text-accent-foreground data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground [&[aria-selected]]:bg-secondary",
+        "relative flex flex w-full cursor-default cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1 text-sm outline-hidden transition-color duration-300 will-change-300 hover:bg-background hover:text-accent-foreground data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground [&[aria-selected]]:bg-muted",
         disabled && 'pointer-events-none opacity-50',
       )}
+      data-slot="select-item"
       data-value={value}
       duck-select-item=""
       value={value}>
       <div
         className={cn(
-          'relative flex select-none items-center gap-2 truncate rounded-xs text-base outline-hidden',
+          'relative flex select-none items-center gap-2 truncate rounded-xs text-sm outline-hidden',
           className,
         )}>
         {children}
@@ -226,6 +233,8 @@ function SelectItem({
       {(_value.length > 0 ? _value : selectedItem?.getAttribute('data-value')) === String(value) && (
         <span
           className="absolute flex items-center justify-center transition-none duration-0 ltr:right-2 ltr:pl-2 rtl:left-2 rtl:pr-2"
+          data-slot="select-indicator"
+          duck-select-indicator=""
           id="select-indicator">
           <CheckIcon className="!size-3.5 shrink-0" />
         </span>
@@ -235,7 +244,15 @@ function SelectItem({
 }
 
 function SelectSeparator({ children, className, ref, ...props }: React.HTMLProps<HTMLDivElement>) {
-  return <div className={cn('-mx-1 my-1 h-px bg-muted', className)} ref={ref} {...props} duck-select-separator="" />
+  return (
+    <div
+      className={cn('-mx-1 my-1 h-px bg-muted', className)}
+      ref={ref}
+      {...props}
+      data-slot="select-separator"
+      duck-select-separator=""
+    />
+  )
 }
 
 function SelectScrollButton({
@@ -247,25 +264,40 @@ function SelectScrollButton({
   return (
     <Button
       className={cn(
-        'sticky z-50 w-full cursor-pointer rounded-none bg-background p-0 [&>div]:justify-center',
+        'sticky z-50 w-full cursor-default cursor-pointer rounded-none bg-background p-0 [&>div]:justify-center',
         scrollDown ? 'bottom-0' : '',
         className,
       )}
       size="sm"
       variant="nothing"
       {...props}
-      duck-select-scroll-up-button="">
+      data-slot="select-scroll-up-button"
+      duck-select-scroll-button="">
       {scrollDown ? <ChevronDown className="shrink-0" /> : <ChevronUp className="shrink-0" />}
     </Button>
   )
 }
 
 function SelectScrollUpButton(props: React.ComponentPropsWithRef<typeof Button>) {
-  return <SelectScrollButton {...props} duck-select-scroll-up-button="" scrollDown={false} />
+  return (
+    <SelectScrollButton
+      {...props}
+      data-slot="select-scroll-up-button"
+      duck-select-scroll-up-button=""
+      scrollDown={false}
+    />
+  )
 }
 
 function SelectScrollDownButton(props: React.ComponentPropsWithRef<typeof Button>) {
-  return <SelectScrollButton {...props} duck-select-scroll-down-button="" scrollDown={true} />
+  return (
+    <SelectScrollButton
+      {...props}
+      data-slot="select-scroll-down-button"
+      duck-select-scroll-down-button=""
+      scrollDown={true}
+    />
+  )
 }
 
 export {

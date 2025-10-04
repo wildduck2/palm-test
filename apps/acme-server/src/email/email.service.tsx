@@ -21,10 +21,9 @@ export class EmailService {
     tls: {
       rejectUnauthorized: false,
     },
-    to: this.config.get('MAIL_FROM_ADDRESS'),
   })
 
-  async sendTestEmail({
+  async sendEmail({
     from = this.config.get('MAIL_FROM_ADDRESS'),
     to,
     subject,

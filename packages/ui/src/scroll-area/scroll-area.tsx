@@ -135,7 +135,14 @@ const ScrollArea = ({
   }
 
   return (
-    <div className={cn('relative overflow-hidden', className)} ref={containerRef} style={style} {...props}>
+    <div
+      className={cn('relative overflow-hidden', className)}
+      ref={containerRef}
+      style={style}
+      {...props}
+      data-orientation={orientation}
+      data-scrollbar-visible={isV || isH}
+      data-slot="scroll-area">
       <div
         className={cn('scrollbar-none h-full w-full overflow-auto', viewportClassName)}
         ref={viewportRef}
@@ -147,6 +154,7 @@ const ScrollArea = ({
         <div
           aria-hidden="true"
           className="absolute bg-transparent opacity-0 hover:opacity-100"
+          data-slot="scroll-area-track"
           onMouseDown={(e) => onClickTrack(e, true)}
           ref={vTrackRef}
           style={vTrackStyle}>
@@ -163,6 +171,7 @@ const ScrollArea = ({
         <div
           aria-hidden="true"
           className="absolute bg-transparent opacity-0 hover:opacity-100"
+          data-slot="scroll-area-track"
           onMouseDown={(e) => onClickTrack(e, false)}
           ref={hTrackRef}
           style={hTrackStyle}>

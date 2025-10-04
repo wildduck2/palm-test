@@ -80,7 +80,7 @@ export const services = pgTable(
     deleted_at: timestamp('deleted_at', { withTimezone: true }),
     description: text('description'),
     id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    name: varchar('name', { length: 100 }).notNull().unique(), // e.g. "GitHub"
+    name: varchar('name', { length: 100 }).notNull().unique(),
     updated_at: timestamp('updated_at', { withTimezone: true }).default(sql`CURRENT_TIMESTAMP`).notNull(),
   },
   (table) => [
@@ -101,6 +101,7 @@ export const accessTokens = pgTable(
     expires_at: timestamp('expires_at', { withTimezone: true }).notNull(),
     id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     name: varchar('name', { length: 255 }).notNull(),
+    notified: boolean('notified').default(false),
     renewed_at: timestamp('renewed_at', { withTimezone: true }),
     service_id: uuid('service_id')
       .notNull()
@@ -108,7 +109,7 @@ export const accessTokens = pgTable(
     status: tokenStatus('status').notNull(),
     token: varchar('token', { length: 255 }).notNull(),
     updated_at: timestamp('updated_at', { withTimezone: true }).default(sql`CURRENT_TIMESTAMP`).notNull(),
-    user_id: uuid('user_id').references(() => users.id, { onDelete: 'set null' }), // optional: token may belong to a user
+    user_id: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
   },
   (table) => [
     index('token_service_idx').on(table.service_id, table.status),

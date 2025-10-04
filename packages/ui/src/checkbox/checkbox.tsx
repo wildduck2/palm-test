@@ -68,6 +68,7 @@ const Checkbox = ({
           'rounded-sm bg-transparent',
           className,
         )}
+        data-slot="checkbox"
         onChange={(e) => {
           const nextChecked = e.target.checked ? true : e.target.indeterminate ? 'indeterminate' : false
           e.target.indeterminate = false
@@ -87,7 +88,11 @@ const Checkbox = ({
 const CheckboxWithLabel = ({ id, _checkbox, _label, className, ref, ...props }: CheckboxWithLabelProps) => {
   const { className: labelClassName, ...labelProps } = _label
   return (
-    <div className={cn('flex items-center justify-start gap-2', className)} ref={ref} {...props}>
+    <div
+      className={cn('flex items-center justify-start gap-2', className)}
+      ref={ref}
+      {...props}
+      data-slot="checkbox-with-label">
       <Checkbox id={id} {..._checkbox} />
       <Label className={cn('cursor-pointer', labelClassName)} htmlFor={id} {...labelProps} />
     </div>
@@ -97,7 +102,7 @@ const CheckboxWithLabel = ({ id, _checkbox, _label, className, ref, ...props }: 
 const CheckboxGroup = ({ subtasks, subtasks_default_values, ref, ...props }: CheckboxGroupProps) => {
   const { _checkbox, _label } = subtasks_default_values || {}
   return (
-    <div className={cn('mb-3 flex flex-col gap-2')} {...props} ref={ref}>
+    <div className={cn('mb-3 flex flex-col gap-2')} {...props} data-slot="checkbox-group" ref={ref}>
       {subtasks.map(({ id, title, checked }) => (
         <CheckboxWithLabel
           _checkbox={{
@@ -106,6 +111,7 @@ const CheckboxGroup = ({ subtasks, subtasks_default_values, ref, ...props }: Che
             className: 'w-4 h-4 rounded-full border-muted-foreground/80',
           }}
           _label={{ ..._label, children: title }}
+          data-slot="checkbox-with-label"
           id={id}
           key={id}
         />

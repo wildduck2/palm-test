@@ -36,13 +36,15 @@ function InputOTP({
         value,
         wrapperRef,
       }}>
+      {/** biome-ignore lint: false positive */}
       <div
         aria-label={ariaLabel}
         className={cn('flex items-center gap-2 disabled:cursor-not-allowed has-[:disabled]:opacity-50', className)}
         ref={wrapperRef}
         role="region"
         {...props}
-        duck-input-otp="">
+        data-slot="input-otp"
+        duck-input-slot="">
         {children}
       </div>
     </OTPInputContext.Provider>
@@ -51,13 +53,15 @@ function InputOTP({
 
 const InputOTPGroup = ({ className, ref, ...props }: React.ComponentPropsWithRef<'div'>) => {
   return (
+    // biome-ignore lint: false positive
     <div
       aria-label="otp-group"
       className={cn('flex items-center', className)}
       ref={ref}
       role="group"
       {...props}
-      duck-input-otp-group=""
+      data-slot="input-otp-group"
+      duck-input-slot=""
     />
   )
 }
@@ -71,7 +75,8 @@ const InputOTPSlot = ({ className, ref, ...props }: React.ComponentPropsWithRef<
         'relative h-10 w-10 border-input border-y border-r text-center text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md focus:shadow-none focus:outline-none focus:ring-ring focus:ring-offset-2',
         className,
       )}
-      duck-input-otp-slot=""
+      data-slot="input-otp-slot"
+      duck-input-slot=""
       maxLength={1}
       ref={ref}
       {...props}
@@ -87,7 +92,7 @@ const InputOTPSeparator = ({
   customIndicator?: React.ReactNode
 }) => {
   return (
-    <div aria-hidden="true" ref={ref} role="presentation" {...props} duck-input-otp-separator="">
+    <div aria-hidden="true" ref={ref} role="presentation" {...props} data-slot="input-otp-separator" duck-input-slot="">
       {customIndicator ? customIndicator : <Dot />}
     </div>
   )

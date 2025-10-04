@@ -34,7 +34,7 @@ function Tabs({ value, defaultValue, onValueChange, ...props }: TabsProps) {
 
   return (
     <TabsContext.Provider value={{ activeItem, setActiveItem }}>
-      <div {...props} aria-orientation="vertical" duck-tabs="" role="tablist" />
+      <div {...props} aria-orientation="vertical" data-slot="tabs" role="tablist" />
     </TabsContext.Provider>
   )
 }
@@ -49,7 +49,7 @@ const TabsList = ({ className, ref, ...props }: TabsListProps) => (
     )}
     ref={ref}
     {...props}
-    duck-tabs-list=""
+    data-slot="tabs-list"
   />
 )
 
@@ -76,19 +76,20 @@ const TabsTrigger = ({
   }, [defaultChecked])
 
   return (
+    // biome-ignore lint: false positive
     <li
+      aria-selected={isActive}
       className={cn(
         'relative inline-flex h-[29.04px] items-center justify-center whitespace-nowrap rounded-sm px-3 font-medium text-sm ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         isActive && 'bg-background text-foreground shadow-sm',
         disabled && 'pointer-events-none opacity-50',
         className,
       )}
-      data-selected={isActive}
       data-value={value}
       id={`tab-${value}`}
       ref={ref}
       {...props}
-      duck-tabs-trigger="">
+      data-slot="tabs-trigger">
       <input
         checked={isActive}
         className="absolute inset-0 appearance-none rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -135,7 +136,7 @@ const TabsContent = ({
       role="tabpanel"
       tabIndex={-1}
       {...props}
-      duck-tabs-content="">
+      data-slot="tabs-content">
       <MountMinimal forceMount={forceMount} open={activeItem === value} ref={null}>
         {children}
       </MountMinimal>

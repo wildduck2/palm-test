@@ -39,6 +39,7 @@ const ChartContainer = ({ id, className, children, config, ref, ...props }: Char
           className,
         )}
         data-chart={chartId}
+        data-slot="chart-container"
         ref={ref}
         {...props}>
         <ChartStyle config={config} id={chartId} />
@@ -57,6 +58,7 @@ const ChartStyle = ({ id, config }: ChartStyleProps) => {
 
   return (
     <style
+      // biome-ignore lint: false positive
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
@@ -109,14 +111,22 @@ const ChartTooltipContent = ({
       !labelKey && typeof label === 'string' ? config[label as keyof typeof config]?.label || label : itemConfig?.label
 
     if (labelFormatter) {
-      return <div className={cn('font-medium', labelClassName)}>{labelFormatter(value, payload)}</div>
+      return (
+        <div className={cn('font-medium', labelClassName)} data-slot="tooltip-label">
+          {labelFormatter(value, payload)}
+        </div>
+      )
     }
 
     if (!value) {
       return null
     }
 
-    return <div className={cn('font-medium', labelClassName)}>{value}</div>
+    return (
+      <div className={cn('font-medium', labelClassName)} data-slot="tooltip-label">
+        {value}
+      </div>
+    )
   }, [label, labelFormatter, payload, hideLabel, labelClassName, config, labelKey])
 
   if (!active || !payload?.length) {
@@ -131,9 +141,10 @@ const ChartTooltipContent = ({
         'grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl',
         className,
       )}
+      data-slot="tooltip-content"
       ref={ref}>
       {nestLabel ? null : tooltipLabel}
-      <div className="grid gap-1.5">
+      <div className="grid gap-1.5" data-slot="tooltip-items">
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || 'value'}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
@@ -145,6 +156,7 @@ const ChartTooltipContent = ({
                 'flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
                 indicator === 'dot' && 'items-center',
               )}
+              data-slot="tooltip-item"
               key={item.dataKey}>
               {formatter && item?.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
@@ -214,6 +226,7 @@ const ChartLegendContent = ({
   return (
     <div
       className={cn('flex items-center justify-center gap-4', verticalAlign === 'top' ? 'pb-3' : 'pt-3', className)}
+      data-slot="legend-content"
       ref={ref}>
       {payload.map((item) => {
         const key = `${nameKey || item.dataKey || 'value'}`
@@ -222,6 +235,7 @@ const ChartLegendContent = ({
         return (
           <div
             className={cn('flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground')}
+            data-slot="legend-item"
             key={item.value}>
             {itemConfig?.icon && !hideIcon ? (
               <itemConfig.icon />

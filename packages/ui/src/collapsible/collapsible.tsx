@@ -65,6 +65,7 @@ function Collapsible({
       value={{ contentId, contentRef, onOpenChange: handleOpenChange, open, triggerRef, wrapperRef }}>
       <div
         className={cn('flex flex-col gap-2', className)}
+        data-slot="collapsible"
         duck-collapsible=""
         ref={wrapperRef}
         {...props}
@@ -83,6 +84,7 @@ function CollapsibleTrigger({ children, onClick, ...props }: React.ComponentProp
       aria-controls={contentId}
       aria-expanded={open}
       data-open={open}
+      data-slot="collapsible-trigger"
       duck-collapsible-trigger=""
       onClick={(e) => {
         onOpenChange?.(!open)
@@ -109,6 +111,7 @@ function CollapsibleContent({
       aria-hidden={!open}
       className={cn('h-0 overflow-hidden transition-all duration-300 ease-in-out data-[open=true]:h-auto', className)}
       data-open={open}
+      data-slot="collapsible-content"
       duck-collapsible-content=""
       id={contentId}
       ref={contentRef}

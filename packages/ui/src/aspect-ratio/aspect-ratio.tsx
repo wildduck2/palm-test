@@ -7,18 +7,21 @@ function AspectRatio({
   style,
   className,
   ratio,
+  ref,
   ...props
-}: React.HTMLProps<HTMLDivElement> & {
+}: React.ComponentPropsWithRef<typeof Slot> & {
   ratio: string
 }) {
   return (
     <Slot
       className={cn('relative h-auto w-full overflow-hidden', className)}
+      ref={ref}
       style={{
         aspectRatio: ratio,
         ...style,
       }}
       {...props}
+      data-slot="aspect-ratio"
     />
   )
 }
