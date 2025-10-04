@@ -1,0 +1,16 @@
+- First in the client i add materials and i speciary gategory.
+- Materials are categorized by type.
+- So i can make list of recipes and each recipe has a list of materials.
+- Each material has a quantity that should be specified.
+- Each recipe has an output material.
+- Each recipe has a list of steps.
+- Each step has a description.
+- Each step has a duration.
+- Each step has a list of materials.
+- Each material has a quantity that should be specified.
+- Each step has a list of outputs.
+- Each output has a quantity that should be specified.
+- We have running process for each recipe.
+- We can view the process log.
+- We can view the processes for the recipe and inspect and get some data about it.
+

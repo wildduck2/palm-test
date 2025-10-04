@@ -1,0 +1,91 @@
+2025-09-20T10:07:15.228642Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 97
+2025-09-20T10:07:15.233987Z  WARN turborepo_filewatch::package_watcher: lagged behind 6 processing file watching events
+2025-09-20T10:07:15.234447Z  WARN turborepo_filewatch::package_watcher: lagged behind 167 processing file watching events
+2025-09-20T10:07:15.866530Z  WARN turborepo_filewatch::package_watcher: lagged behind 9 processing file watching events
+2025-09-20T10:07:15.866548Z  WARN turborepo_filewatch::package_watcher: lagged behind 25 processing file watching events
+2025-09-20T10:07:15.866623Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 35
+2025-09-20T10:07:15.868056Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 5
+2025-09-20T10:07:15.868122Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 8
+2025-09-20T10:07:15.868454Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 94
+2025-09-20T10:07:15.869272Z  WARN turborepo_filewatch::package_watcher: lagged behind 353 processing file watching events
+2025-09-20T10:07:15.869277Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 258
+2025-09-20T10:07:15.869316Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 4
+2025-09-20T10:07:15.869373Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 23
+2025-09-20T10:07:15.869376Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 4
+2025-09-20T10:07:15.869380Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 3
+2025-09-20T10:07:15.869351Z  WARN turborepo_filewatch::package_watcher: lagged behind 21 processing file watching events
+2025-09-20T10:07:15.869478Z  WARN turborepo_filewatch::package_watcher: lagged behind 37 processing file watching events
+2025-09-20T10:07:15.869485Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 29
+2025-09-20T10:07:15.869509Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 6
+2025-09-20T10:07:15.869789Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 7
+2025-09-20T10:07:15.870018Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 66
+2025-09-20T10:07:15.871128Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 14
+2025-09-20T10:07:15.871168Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 1
+2025-09-20T10:07:15.871300Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 5
+2025-09-20T10:07:15.871424Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 4
+2025-09-20T10:07:15.871427Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 2
+2025-09-20T10:07:15.869786Z  WARN turborepo_filewatch::package_watcher: lagged behind 16 processing file watching events
+2025-09-20T10:07:15.871605Z  WARN turborepo_filewatch::package_watcher: lagged behind 151 processing file watching events
+2025-09-20T10:07:15.872870Z  WARN turborepo_filewatch::package_watcher: lagged behind 1 processing file watching events
+2025-09-20T10:07:15.872885Z  WARN turborepo_filewatch::package_watcher: lagged behind 25 processing file watching events
+2025-09-20T10:07:15.872888Z  WARN turborepo_filewatch::package_watcher: lagged behind 5 processing file watching events
+2025-09-20T10:07:15.872891Z  WARN turborepo_filewatch::package_watcher: lagged behind 4 processing file watching events
+2025-09-20T10:07:15.872893Z  WARN turborepo_filewatch::package_watcher: lagged behind 4 processing file watching events
+2025-09-20T10:07:15.872894Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.872896Z  WARN turborepo_filewatch::package_watcher: lagged behind 1 processing file watching events
+2025-09-20T10:07:15.872899Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.872901Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.872902Z  WARN turborepo_filewatch::package_watcher: lagged behind 1 processing file watching events
+2025-09-20T10:07:15.872904Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.872905Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.872907Z  WARN turborepo_filewatch::package_watcher: lagged behind 1 processing file watching events
+2025-09-20T10:07:15.872909Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.872910Z  WARN turborepo_filewatch::package_watcher: lagged behind 1 processing file watching events
+2025-09-20T10:07:15.872911Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.872913Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.872916Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.882941Z  WARN turborepo_filewatch::package_watcher: lagged behind 587 processing file watching events
+2025-09-20T10:07:15.883240Z  WARN turborepo_filewatch::package_watcher: lagged behind 76 processing file watching events
+2025-09-20T10:07:15.883819Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 637
+2025-09-20T10:07:15.884373Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 1
+2025-09-20T10:07:15.884489Z  WARN turborepo_filewatch::package_watcher: lagged behind 178 processing file watching events
+2025-09-20T10:07:15.885350Z  WARN turborepo_filewatch::package_watcher: lagged behind 48 processing file watching events
+2025-09-20T10:07:15.885621Z  WARN turborepo_filewatch::globwatcher: encountered filewatching error, flushing all globs: channel lagged by 185
+2025-09-20T10:07:15.887382Z  WARN turborepo_filewatch::package_watcher: lagged behind 4 processing file watching events
+2025-09-20T10:07:15.887398Z  WARN turborepo_filewatch::package_watcher: lagged behind 1 processing file watching events
+2025-09-20T10:07:15.890632Z  WARN turborepo_filewatch::package_watcher: lagged behind 13 processing file watching events
+2025-09-20T10:07:15.890646Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.890996Z  WARN turborepo_filewatch::package_watcher: lagged behind 1 processing file watching events
+2025-09-20T10:07:15.891000Z  WARN turborepo_filewatch::package_watcher: lagged behind 6 processing file watching events
+2025-09-20T10:07:15.891002Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891004Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.891006Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891007Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891010Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.891014Z  WARN turborepo_filewatch::package_watcher: lagged behind 4 processing file watching events
+2025-09-20T10:07:15.891015Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891017Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891019Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891020Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891022Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891023Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891025Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891027Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891029Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891031Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891032Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891034Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.891036Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891038Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.891103Z  WARN turborepo_filewatch::package_watcher: lagged behind 45 processing file watching events
+2025-09-20T10:07:15.948081Z  WARN turborepo_filewatch::package_watcher: lagged behind 16 processing file watching events
+2025-09-20T10:07:15.948094Z  WARN turborepo_filewatch::package_watcher: lagged behind 29 processing file watching events
+2025-09-20T10:07:15.948097Z  WARN turborepo_filewatch::package_watcher: lagged behind 5 processing file watching events
+2025-09-20T10:07:15.948099Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.948101Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.948103Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.948105Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.948106Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.948108Z  WARN turborepo_filewatch::package_watcher: lagged behind 3 processing file watching events
+2025-09-20T10:07:15.948110Z  WARN turborepo_filewatch::package_watcher: lagged behind 2 processing file watching events
+2025-09-20T10:07:15.948458Z  WARN turborepo_filewatch::package_watcher: lagged behind 20 processing file watching events
