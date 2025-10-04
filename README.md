@@ -1,159 +1,174 @@
-# `@gentleduck/duck-kit`
-Monorepo template with full-stack TypeScript, Docker, and pnpm workspaces.
+# Full Stack Engineer Trial Task
 
----
+Welcome to your Trial Task.🌴 We’re excited to see your skills and how you submit work. As you work through the questions, please ensure you save your responses locally to ensure no data is lost. Good luck\!
 
-## 🧠 1. `acme-server` – NestJS Backend
+-----
 
-* Modular backend API using **NestJS**
-* Integrates PostgreSQL, Redis, MinIO, Mailer
-* Hot reload via `start:dev`
-* **Directory**: `apps/acme-server`
+## QUESTION 1: Build a Lightweight Access Manager
 
----
+### Overview
 
-## 🖥️ 2. `acme-client` – Next.js Frontend
+Imagine we’re launching an internal tool to manage API access tokens across multiple services. Could you build a simple “Access Manager” UI and backend?
 
-* App Router + Tailwind + modular folders
-* Connected to backend and shared packages
-* **Directory**: `apps/acme-client`
+### Your Task
 
----
+  * **Frontend**: A table showing access tokens per service (Service Name, Token, Expiry Date, Status).
+  * Add filters: by Service or Expiry (e.g. expired tokens only).
+  * **Backend**: Serve mock data via a `/api/tokens` endpoint.
+  * **Bonus**: “Renew Token” button (no need for real logic - just UI + stub handler).
 
-## 🐘 3. `acme-postgres` – PostgreSQL
+### My Solution: Architecture & Implementation
 
-* Persistent database with Docker volume
-* Used by backend and Drizzle ORM
-* **Docker Service Only**
+Here is a detailed breakdown of the implementation for the Lightweight Access Manager, covering both the frontend and backend components.
 
----
+### Backend Implementation
 
-## 🧊 4. `acme-redis` – Redis Cache
+The backend is built using **NestJS**, a progressive Node.js framework ideal for creating efficient and scalable server-side applications. It exposes a RESTful API to manage access tokens.
 
-* In-memory store for sessions, caching, queues
-* Auto-restart and fast boot
-* **Docker Service Only**
+#### API Endpoints
 
----
+The core of the backend is the `/api/tokens` endpoint, which provides the following functionalities:
 
-## ☁️ 5. `acme-minio` – S3-Compatible Storage
+  * **`GET /api/tokens`**: Retrieves a list of all access tokens. This endpoint is used by the frontend to populate the main data table.
+  * **`GET /api/tokens/:id`**: Fetches a single access token by its unique ID.
+  * **`POST /api/tokens`**: Creates a new access token. The service automatically generates a secure token and sets a default expiry date.
+  * **`PATCH /api/tokens/:id`**: Updates the details of an existing access token, such as its status.
+  * **`DELETE /api/tokens/:id`**: Deletes an access token from the system.
+  * **`PATCH /api/tokens/:id/renew`**: Renews an access token, generating a new token string and extending its expiry date.
 
-* S3-compatible object storage with web console
-* Used for file uploads and asset storage
-* **Docker Service Only**
+#### `AccessTokensService`
 
----
+The business logic for managing access tokens is encapsulated in the `AccessTokensService`, as detailed in `apps/acme-server/src/access-tokens/access-tokens.service.ts`. This service is responsible for all interactions with the data source.
 
-## 🧬 6. `acme-drizzle` – Drizzle Studio
+  * **`getAll()`**: This method queries the database for all access tokens and returns them. If no tokens are found, it throws a 404 Not Found error.
+  * **`getOne(id)`**: Fetches a single token based on the provided `id`. If the token doesn't exist, it returns a 404 error.
+  * **`create(data)`**: When creating a new token, this method:
+    1.  Generates a 64-character hexadecimal token using `randomBytes` from the Node.js `crypto` module.
+    2.  Sets a default expiry date of 7 days from the creation time.
+    3.  Inserts the new token data into the database and returns the created record.
+  * **`update(id, dto)`**: Updates a token with the new data provided in the `dto` (Data Transfer Object) and returns the updated record.
+  * **`delete(id)`**: Removes a token from the database.
+  * **`renew(id)`**: To renew a token, this method generates a new token string and sets a new 7-day expiry date, then updates the existing token in the database.
 
-* GUI for inspecting PostgreSQL schema
-* Runs from custom Dockerfile
-* **Directory**: `packages/db`
+#### Data Model and Database
 
----
+The backend uses **Drizzle ORM** to interact with a PostgreSQL database, as indicated by the use of `drizzle-orm/node-postgres`. Drizzle provides a type-safe SQL-like syntax for database queries. The `accessTokens` schema includes columns for `id`, `user_id`, `token`, `expires_at`, and `status`.
 
-## 💌 7. `acme-mailhog` – Email Tester
+-----
 
-* Catches and displays outgoing emails
-* SMTP + web UI for local testing
-* **Docker Service Only**
+### Frontend Implementation
 
----
+The frontend is a **React** application, likely built with **Next.js** given the project structure, providing a user-friendly interface for managing the access tokens.
 
-### Sketch Token Expiry Automation
+#### Main Components
 
-**Overview**
+  * **`AccessTokensTable`**: This is the central component of the UI. It displays the list of access tokens in a table with columns for "Service Name," "Token," "Expiry Date," and "Status." The table would also feature sorting capabilities.
+  * **`Filters`**: A dedicated component that houses the filtering controls:
+      * A dropdown menu to filter tokens by **Service Name**.
+      * A set of radio buttons or a select menu to filter by **Status** (e.g., "All," "Active," "Expired").
+  * **`RenewTokenButton`**: A button component placed in each row of the table. It triggers the token renewal process.
 
-This section outlines the proposed implementation for a feature that automatically emails engineers when their access token is due to expire within a 3-day window. The system will be designed to avoid sending notifications for tokens that have already been renewed or for which a notification has already been sent.
+#### State Management
 
-The plan leverages the existing project structure, including the NestJS backend, the Drizzle ORM, and the pre-configured email service.
+The application would leverage a modern data-fetching library like **React Query** for managing server state. This simplifies data fetching, caching, and synchronization with the backend API.
 
-**1. Trigger Mechanism: Scheduled Cron Job**
+  * **`useGetTokens`**: A custom hook that fetches the list of all access tokens from the `/api/tokens` endpoint using React Query's `useQuery`. It automatically handles loading and error states, providing a seamless experience.
+  * **`useRenewToken`**: Another custom hook that uses React Query's `useMutation` to handle the token renewal. When the "Renew Token" button is clicked, this mutation sends a `PATCH` request to the `/api/tokens/:id/renew` endpoint. Upon a successful response, it automatically invalidates the `useGetTokens` query, triggering a refetch of the token list to display the updated information in the table.
 
-The automation will be triggered by a scheduled task running once per day.
+#### Data Flow
 
--   **Implementation:** A new method will be created within the `apps/acme-server/src/access-tokens/access-tokens.service.ts` file.
--   **Technology:** We will use the `@nestjs/schedule` package. The new method will be decorated with `@Cron(CronExpression.EVERY_DAY_AT_3AM)` to ensure it runs at a consistent time.
--   **Setup:** The `ScheduleModule.forRoot()` will be added to the imports array in `apps/acme-server/src/app.module.ts` to enable scheduling.
+1.  When the `AccessTokensTable` component mounts, the `useGetTokens` hook is called, which initiates a `GET` request to the backend.
+2.  The backend's `AccessTokensService` retrieves the token data from the database and returns it.
+3.  The frontend then renders the data in the table.
+4.  When a user applies a filter, the component's state is updated, and the displayed data is filtered on the client side. For larger datasets, this could be optimized to refetch filtered data from the server.
+5.  Clicking the "Renew Token" button triggers the `useRenewToken` mutation, which updates the token on the backend and then automatically refreshes the data in the UI.
 
-**2. State Tracking & Data Model**
+-----
 
-The existing `accessTokens` table in the PostgreSQL database is already well-suited for this task. We will use the following columns:
+## QUESTION 2: Sketch Token Expiry Automation
 
--   `expires_at` (timestamp): To determine which tokens are nearing expiry.
--   `renewed_at` (timestamp): A `NULL` value in this column indicates the token has not been renewed.
--   `notified` (boolean): This flag will be used to track whether an expiry notification has been sent, preventing duplicate emails.
--   `status` (enum): To ensure we only process tokens that are currently `'active'`.
--   `user_id` (uuid): To link the token back to the user who needs to be notified.
+### Overview
 
-**3. Core Logic & Pseudocode**
+We’re now exploring a feature that auto-emails engineers when their access token is due to expire within 3 days, unless it was already renewed.
 
-The cron job will execute the following logic within the `access-tokens.service.ts`:
+### Your Task
+
+  * Trigger this automation
+  * Store/track token states (expiry, renewed)
+  * Prevent repeat alerts or message spam
+  * **Bonus**: flag any edge cases you’d plan for
+
+### My Solution: Automation Design
+
+Here is a detailed plan for implementing the token expiry automation feature.
+
+#### 1\. Triggering the Automation
+
+A **cron job** is the ideal solution for triggering a daily check for expiring tokens. A scheduled task will run once a day (e.g., at midnight UTC) to scan the `access_tokens` table in the database.
+
+**Pseudocode for the Cron Job:**
 
 ```typescript
-// In apps/acme-server/src/access-tokens/access-tokens.service.ts
+// In a dedicated scheduling service within the NestJS backend
+
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { and, eq, isNull, lte, gte, inArray } from 'drizzle-orm';
-import { DrizzleService } from '../drizzle/drizzle.service';
+import { AccessTokensService } from '../access-tokens/access-tokens.service';
 import { EmailService } from '../email/email.service';
-import { accessTokens, users } from '@acme/db/src/tables';
 
 @Injectable()
-export class AccessTokensService {
+export class TokenExpiryNotifier {
   constructor(
-    private readonly drizzle: DrizzleService,
+    private readonly accessTokensService: AccessTokensService,
     private readonly emailService: EmailService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_3AM)
-  async handleTokenExpiryAutomation() {
-    // 1. Define the expiry window (now + 3 days)
-    const threeDaysFromNow = new Date();
-    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleCron() {
+    // Get all tokens that will expire in the next 3 days
+    const expiringTokens = await this.accessTokensService.findTokensExpiringSoon(3);
 
-    // 2. Find relevant tokens using Drizzle ORM
-    const expiringTokens = await this.drizzle.db.query.accessTokens.findMany({
-      with: {
-        user: true, // Join with the user table to get email
-      },
-      where: and(
-        eq(accessTokens.status, 'active'),
-        eq(accessTokens.notified, false),
-        isNull(accessTokens.renewed_at),
-        lte(accessTokens.expires_at, threeDaysFromNow),
-        gte(accessTokens.expires_at, new Date()), // Ensure it hasn't already expired
-        eq(users.is_active, true) // Ensure user is still active
-      ),
-    });
-
-    if (expiringTokens.length === 0) {
-      return; // No tokens to process
-    }
-
-    // 3. Send notifications
     for (const token of expiringTokens) {
-      if (token.user) {
-        await this.emailService.sendExpiringTokenEmail(token.user, token);
-      }
-    }
+      // Check if a notification has not already been sent
+      if (!token.notificationSentAt) {
+        // Send the expiry notification email
+        await this.emailService.sendTokenExpiryEmail({
+          tokenName: token.name,
+          expiresAt: token.expiresAt.toISOString(),
+        });
 
-    // 4. Mark tokens as notified to prevent spam
-    const tokenIds = expiringTokens.map(t => t.id);
-    if (tokenIds.length > 0) {
-      await this.drizzle.db
-        .update(accessTokens)
-        .set({ notified: true })
-        .where(inArray(accessTokens.id, tokenIds));
+        // Mark the token as having had a notification sent
+        await this.accessTokensService.markNotificationAsSent(token.id);
+      }
     }
   }
 }
 ```
 
-**4. Bonus: Edge Cases & Considerations**
+#### 2\. Storing and Tracking Token States
 
--   **Timezones:** All dates (`expires_at`, `created_at`, etc.) are stored with timezones in the database (`timestamp with time zone`). The cron job logic must be written to handle timezones correctly, and all server-side date operations should be in UTC to maintain consistency.
--   **Job Failure & Idempotency:** If the cron job fails after sending some emails but before marking them as `notified`, the next run might send duplicate emails. The current logic minimizes this, but for a fully robust system, one could update the `notified` flag inside the loop for each token. However, this is less performant. The current batch update is a good trade-off.
--   **User Deactivated:** The query includes a check (`users.is_active`) to ensure notifications are not sent for tokens belonging to deactivated users.
--   **Email Service Failure:** If the `emailService` fails, the error will be caught by NestJS's global error handling. The `notified` flag will not be set, so the system will automatically retry sending the notification on the next daily run.
--   **Performance:** For very large `accessTokens` tables, the daily query could become slow. The existing indexes on `expires_at`, `status`, and `user_id` are beneficial and should be maintained.
+To effectively manage notifications, the `access_tokens` table schema should be enhanced:
+
+  * **`expires_at` (timestamp)**: This existing field is crucial for identifying which tokens are about to expire.
+  * **`status` (enum: 'active', 'expired', 'revoked')**: This allows us to filter for only active tokens that need notifications.
+  * **`notification_sent_at` (timestamp, nullable)**: A new field to track when the last expiry notification was sent. This is more robust than a simple boolean flag, as it can be used for more complex logic in the future (e.g., sending multiple reminders).
+
+When a token is renewed using the `renew()` method, the logic should be updated to set `notification_sent_at` back to `NULL`, making the token eligible for future expiry notifications.
+
+#### 3\. Preventing Repeat Alerts
+
+The `notification_sent_at` field is the key to preventing duplicate notifications and message spam. The cron job will only select tokens where `notification_sent_at` is `NULL`.
+
+  * **Initial Notification**: The cron job queries for active tokens expiring within 3 days where `notification_sent_at` is `NULL`.
+  * **Sending the Email**: For each of these tokens, it sends an email using a service that renders the `TokenExpiryEmail` React component, as defined in `apps/acme-server/src/email/emails/expiring-token.tsx`.
+  * **Updating the State**: After successfully sending the email, the cron job updates the token's `notification_sent_at` field with the current timestamp.
+
+This ensures that a notification is sent only once for each expiry period.
+
+#### 4\. Bonus: Edge Cases to Plan For
+
+  * **User is Away/Inactive**: If an engineer is on vacation, they might miss the notification. A follow-up reminder could be sent 24 hours before expiry if the token hasn't been renewed.
+  * **Email Delivery Failures**: The email sending service should have a robust retry mechanism. If an email fails to send after several retries, the failure should be logged, and the `notification_sent_at` field should only be updated on successful delivery.
+  * **Time Zone Differences**: The cron job should run at a consistent time (e.g., UTC). The expiry date in the email should be displayed in the user's local time zone or a standard format. The `toLocaleString()` method in the `TokenExpiryEmail` component already helps with this.
+  * **Deactivated Users**: The system should not send notifications to users whose accounts are deactivated. The query for expiring tokens should ensure that only active users are notified.
+  * **Database Performance**: If the system manages a very large number of tokens, the daily database query could become a performance bottleneck. The `expires_at` column should be indexed to ensure that the query for expiring tokens remains efficient.
