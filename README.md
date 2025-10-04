@@ -1,3 +1,12 @@
+
+
+> NOTE:  this is not written by me it's written by some AI tools, it's a mix of both of them,
+> for the record I am too tired after all of this load of work to write a proper readme,
+> so thanks good these kinda creatures for helping me out
+> it's a shame that I can't write a proper readme for this project
+> I love writing readmes but I'm too tired to do it right now
+> Enjoy the readme, it's a good one I hope.
+
 # Full Stack Engineer Trial Task
 
 Welcome to your Trial Task.🌴 We’re excited to see your skills and how you submit work. As you work through the questions, please ensure you save your responses locally to ensure no data is lost. Good luck\!
