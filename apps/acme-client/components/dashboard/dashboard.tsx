@@ -1,45 +1,20 @@
 'use client'
 
-import { Badge } from '@acme/ui/badge'
 import { Button } from '@acme/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@acme/ui/card'
-import { Input } from '@acme/ui/input'
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@acme/ui/chart'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@acme/ui/select'
 import { Skeleton } from '@acme/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@acme/ui/table'
+import { ToggleGroup, ToggleGroupItem } from '@acme/ui/toggle-group'
+import { useIsMobile } from '@gentleduck/hooks/use-is-mobile'
 import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
-import {
-  ArrowDown,
-  ArrowUp,
-  CheckCircle2,
-  Clock,
-  Key,
-  RefreshCw,
-  Search,
-  TrendingUp,
-  Users,
-  XCircle,
-} from 'lucide-react'
+import { ArrowDown, ArrowUp, CheckCircle2, Clock, Key, RefreshCw, Users } from 'lucide-react'
 import React from 'react'
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { toast } from 'sonner'
 import { server_api } from '~/libs/axios'
-import { ChartAreaInteractive } from './charts-area'
-import { DataTable } from './data-table'
 
+// Types
 interface TokenOverview {
   total: number
   expired: number
@@ -48,35 +23,19 @@ interface TokenOverview {
   deleted: number
 }
 
-interface TokenByStatus {
-  status: string
-  count: number
+interface TokenTimeSeries {
+  date: string
+  tokensCreated: number
+  activeTokensCreated: number
+  usersRegistered: number
+  userLogins: number
 }
 
-interface TokenByService {
-  serviceId: string
-  serviceName: string
-  serviceDescription: string | null
-  totalTokens: number
-  activeTokens: number
-  expiredTokens: number
-}
-
-interface ExpiringToken {
-  id: string
-  name: string
-  serviceName: string
-  userName: string | null
-  userEmail: string | null
-  expiresAt: string
-  daysUntilExpiry: string
-  status: string
-}
-
-interface RenewalStats {
-  totalRenewed: number
-  renewedThisMonth: number
-  avgRenewalTimeSeconds: number | null
+interface PercentageChanges {
+  totalTokensChange: number
+  activeTokensChange: number
+  expiringSoonChange: number
+  totalUsersChange: number
 }
 
 interface UserStats {
@@ -86,39 +45,38 @@ interface UserStats {
   deletedUsers: number
 }
 
-interface TopUser {
-  userId: string
-  userName: string
-  email: string
-  totalTokens: number
-  activeTokens: number
-  expiredTokens: number
-}
-
-interface OtpStats {
-  total: number
-  active: number
-  expired: number
-  deleted: number
-}
-
 interface DashboardData {
   timestamp: string
+  percentageChanges: PercentageChanges
+  timeSeries: TokenTimeSeries[]
   tokens: {
     overview: TokenOverview
-    byStatus: TokenByStatus[]
-    byService: TokenByService[]
-    expiringSoon: ExpiringToken[]
+    byStatus: any[]
+    byService: any[]
+    expiringSoon: any[]
     needingNotification: any[]
-    renewalStats: RenewalStats
+    renewalStats: any
   }
   users: {
     stats: UserStats
-    topUsers: TopUser[]
+    topUsers: any[]
   }
-  otp: OtpStats
+  otp: any
 }
 
+// Chart Config
+const chartConfig = {
+  activeTokens: {
+    color: 'var(--chart-1)',
+    label: 'Active Tokens',
+  },
+  tokens: {
+    color: 'var(--chart-2)',
+    label: 'Total Tokens',
+  },
+} satisfies ChartConfig
+
+// Components
 function MetricCard({
   title,
   value,
@@ -138,14 +96,14 @@ function MetricCard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="font-medium text-sm">{title}</CardTitle>
-        {trend && (
+        {trend && trendLabel && (
           <div className="flex items-center gap-1 text-xs">
             {trend === 'up' ? (
-              <ArrowUp className="h-3 w-3 text-green-600" />
+              <ArrowUp className="h-3 w-3 text-chart-2" />
             ) : (
-              <ArrowDown className="h-3 w-3 text-red-600" />
+              <ArrowDown className="h-3 w-3 text-chart-1" />
             )}
-            <span className={trend === 'up' ? 'text-green-600' : 'text-red-600'}>{trendLabel}</span>
+            <span className={trend === 'up' ? 'text-chart-2' : 'text-chart-1'}>{trendLabel}</span>
           </div>
         )}
       </CardHeader>
@@ -162,59 +120,199 @@ function MetricCard({
   )
 }
 
-function CustomTooltip({ active, payload, label }: any) {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded-lg border border-border bg-foreground p-3 shadow-lg">
-        <p className="mb-1 font-medium text-sm">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p className="text-xs" key={index} style={{ color: entry.color }}>
-            {entry.name}: {entry.value}
-          </p>
-        ))}
-      </div>
-    )
-  }
-  return null
+function ChartAreaInteractive({
+  data,
+  timeRange,
+  onTimeRangeChange,
+}: {
+  data: TokenTimeSeries[]
+  timeRange: string
+  onTimeRangeChange: (value: string) => void
+}) {
+  const isMobile = useIsMobile()
+
+  React.useEffect(() => {
+    if (isMobile && timeRange === '90d') {
+      onTimeRangeChange('7d')
+    }
+  }, [isMobile, timeRange, onTimeRangeChange])
+
+  const filteredData = React.useMemo(() => {
+    if (!data || data.length === 0) return []
+
+    let daysToShow = 90
+    if (timeRange === '30d') {
+      daysToShow = 30
+    } else if (timeRange === '7d') {
+      daysToShow = 7
+    }
+
+    return data.slice(-daysToShow)
+  }, [data, timeRange])
+
+  return (
+    <Card className="@container/card">
+      <CardHeader className="relative">
+        <CardTitle>Token Activity</CardTitle>
+        <CardDescription>
+          <span className="@[540px]/card:block hidden">Token creation and activity over time</span>
+          <span className="@[540px]/card:hidden">Token activity</span>
+        </CardDescription>
+        <div className="absolute top-4 right-4">
+          <ToggleGroup
+            className="@[767px]/card:flex hidden"
+            onValueChange={onTimeRangeChange}
+            type="single"
+            value={timeRange}
+            variant="outline">
+            <ToggleGroupItem className="h-9 px-2.5" value="90d">
+              Last 3 months
+            </ToggleGroupItem>
+            <ToggleGroupItem className="h-9 px-2.5" value="30d">
+              Last 30 days
+            </ToggleGroupItem>
+            <ToggleGroupItem className="h-9 px-2.5" value="7d">
+              Last 7 days
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <Select onValueChange={onTimeRangeChange} value={timeRange}>
+            <SelectTrigger aria-label="Select a value" className="flex @[767px]/card:hidden w-40">
+              <SelectValue placeholder="Last 3 months" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem className="rounded-lg" value="90d">
+                Last 3 months
+              </SelectItem>
+              <SelectItem className="rounded-lg" value="30d">
+                Last 30 days
+              </SelectItem>
+              <SelectItem className="rounded-lg" value="7d">
+                Last 7 days
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        <ChartContainer className="aspect-auto h-[250px] w-full" config={chartConfig}>
+          <AreaChart data={filteredData}>
+            <defs>
+              <linearGradient id="fillActiveTokens" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-chart-1)" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="var(--color-chart-1)" stopOpacity={0.1} />
+              </linearGradient>
+              <linearGradient id="fillTokens" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-chart-2)" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="var(--color-chart-2)" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              axisLine={false}
+              dataKey="date"
+              minTickGap={32}
+              tickFormatter={(value) => {
+                const date = new Date(value)
+                return date.toLocaleDateString('en-US', {
+                  day: 'numeric',
+                  month: 'short',
+                })
+              }}
+              tickLine={false}
+              tickMargin={8}
+            />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  indicator="dot"
+                  labelFormatter={(value) => {
+                    return new Date(value).toLocaleDateString('en-US', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })
+                  }}
+                />
+              }
+              cursor={false}
+            />
+            <Area
+              dataKey="activeTokensCreated"
+              fill="url(#fillActiveTokens)"
+              stackId="a"
+              stroke="var(--color-chart-1)"
+              type="natural"
+              name="Active Tokens"
+            />
+            <Area
+              dataKey="tokensCreated"
+              fill="url(#fillTokens)"
+              stackId="a"
+              stroke="var(--color-chart-2)"
+              type="natural"
+              name="Total Tokens"
+            />
+          </AreaChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  )
 }
 
+function LoadingSkeleton() {
+  return (
+    <div className="container mx-auto space-y-6 p-6">
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-4 w-24" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="mt-2 h-3 w-32" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-32" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[250px] w-full" />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// Main Component
 export function AnalyticsDashboard() {
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [timePeriod, setTimePeriod] = React.useState<'7d' | '30d' | '3m'>('30d')
+  const [timeRange, setTimeRange] = React.useState<'7d' | '30d' | '90d'>('30d')
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery<DashboardData>({
     queryFn: async () => {
-      const { data: res } = await server_api.get('/analytics/dashboard')
+      const range = timeRange === '7d' ? 'week' : timeRange === '30d' ? 'month' : 'quarter'
+      const { data: res } = await server_api.get(`/analytics/dashboard?range=${range}`)
       return res.data
     },
-    queryKey: ['analytics-dashboard'],
+    queryKey: ['analytics-dashboard', timeRange],
     refetchInterval: 30000,
   })
 
-  const timeSeriesData = React.useMemo(() => {
-    const days = timePeriod === '7d' ? 7 : timePeriod === '30d' ? 30 : 90
-    return Array.from({ length: days }, (_, i) => {
-      const date = new Date()
-      date.setDate(date.getDate() - (days - i - 1))
-      return {
-        active: Math.floor(Math.random() * 50) + (data ? data.tokens.overview.active * 0.8 : 0),
-        date: date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
-        expired: Math.floor(Math.random() * 20) + (data ? data.tokens.overview.expired * 0.5 : 0),
-      }
-    })
-  }, [data, timePeriod])
+  const formatPercentage = (value: number) => {
+    const sign = value >= 0 ? '+' : ''
+    return `${sign}${value.toFixed(1)}%`
+  }
 
-  const filteredTokens = React.useMemo(() => {
-    if (!searchQuery || !data) return []
-    const query = searchQuery.toLowerCase()
-    return data.tokens.expiringSoon.filter(
-      (token) =>
-        token.name.toLowerCase().includes(query) ||
-        token.serviceName.toLowerCase().includes(query) ||
-        token.userName?.toLowerCase().includes(query) ||
-        token.userEmail?.toLowerCase().includes(query),
-    )
-  }, [data, searchQuery])
+  const getTrend = (value: number): 'up' | 'down' => {
+    return value >= 0 ? 'up' : 'down'
+  }
 
   const healthScore = data ? Math.round((data.tokens.overview.active / data.tokens.overview.total) * 100) : 0
 
@@ -268,76 +366,48 @@ export function AnalyticsDashboard() {
             description="All tokens in system"
             icon={Key}
             title="Total Tokens"
-            trend="up"
-            trendLabel="+12.5%"
+            trend={getTrend(data.percentageChanges.totalTokensChange)}
+            trendLabel={formatPercentage(data.percentageChanges.totalTokensChange)}
             value={data.tokens.overview.total.toLocaleString()}
           />
           <MetricCard
             description={`${healthScore}% of total`}
             icon={CheckCircle2}
             title="Active Tokens"
-            trend="up"
-            trendLabel="+8.2%"
+            trend={getTrend(data.percentageChanges.activeTokensChange)}
+            trendLabel={formatPercentage(data.percentageChanges.activeTokensChange)}
             value={data.tokens.overview.active.toLocaleString()}
           />
           <MetricCard
             description="Next 30 days"
             icon={Clock}
             title="Expiring Soon"
-            trend="down"
-            trendLabel="-3.1%"
+            trend={getTrend(data.percentageChanges.expiringSoonChange)}
+            trendLabel={formatPercentage(data.percentageChanges.expiringSoonChange)}
             value={data.tokens.overview.expiringSoon.toLocaleString()}
           />
           <MetricCard
             description="Registered users"
             icon={Users}
             title="Total Users"
-            trend="up"
-            trendLabel="+5.4%"
+            trend={getTrend(data.percentageChanges.totalUsersChange)}
+            trendLabel={formatPercentage(data.percentageChanges.totalUsersChange)}
             value={data.users.stats.totalUsers.toLocaleString()}
           />
         </div>
 
         {/* Time Series Chart */}
-        <ChartAreaInteractive />
+        <ChartAreaInteractive
+          data={data.timeSeries}
+          timeRange={timeRange}
+          onTimeRangeChange={(value) => setTimeRange(value as '7d' | '30d' | '90d')}
+        />
 
         {/* Footer */}
         <div className="text-center text-muted-foreground text-xs">
           Last updated: {new Date(data.timestamp).toLocaleString()}
         </div>
       </div>
-    </div>
-  )
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="container mx-auto space-y-6 p-6">
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-4 w-24" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-20" />
-              <Skeleton className="mt-2 h-3 w-32" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[300px] w-full" />
-        </CardContent>
-      </Card>
     </div>
   )
 }

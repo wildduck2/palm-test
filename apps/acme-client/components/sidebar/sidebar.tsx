@@ -20,21 +20,21 @@ const data = {
       icon: Coins,
       title: 'Services',
     },
-    {
-      href: '/analytics',
-      icon: BarChart3,
-      title: 'Analytics',
-    },
-    {
-      href: '/notifications',
-      icon: Bell,
-      title: 'Notifications',
-    },
-    {
-      href: '/settings',
-      icon: Settings,
-      title: 'Settings',
-    },
+    // {
+    //   href: '/analytics',
+    //   icon: BarChart3,
+    //   title: 'Analytics',
+    // },
+    // {
+    //   href: '/notifications',
+    //   icon: Bell,
+    //   title: 'Notifications',
+    // },
+    // {
+    //   href: '/settings',
+    //   icon: Settings,
+    //   title: 'Settings',
+    // },
   ],
 }
 

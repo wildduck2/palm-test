@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { and, count, desc, eq, gt, isNull, lt, sql } from 'drizzle-orm'
+import { and, count, desc, eq, gt, gte, isNull, lt, lte, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { DrizzleAsyncProvider, schema } from '~/drizzle'
 
@@ -15,6 +15,7 @@ export class AnalyticsService {
   async getTokenOverview() {
     const now = new Date()
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
     const result = await this.drizzle
       .select({
@@ -24,7 +25,7 @@ export class AnalyticsService {
         deleted: count(sql`CASE WHEN ${accessTokens.deleted_at} IS NOT NULL THEN 1 END`),
         expired: count(sql`CASE WHEN ${accessTokens.expires_at} < ${now} THEN 1 END`),
         expiringSoon: count(
-          sql`CASE WHEN ${accessTokens.expires_at} BETWEEN ${now} AND ${sevenDaysFromNow} AND ${accessTokens.deleted_at} IS NULL THEN 1 END`,
+          sql`CASE WHEN ${accessTokens.expires_at} BETWEEN ${now} AND ${thirtyDaysFromNow} AND ${accessTokens.deleted_at} IS NULL THEN 1 END`,
         ),
         total: count(),
       })
@@ -178,7 +179,144 @@ export class AnalyticsService {
     return result[0]
   }
 
-  async getComprehensiveDashboard() {
+  /**
+   * Get time series data for tokens and users
+   * @param days Number of days to look back (7, 30, or 90)
+   */
+  async getTimeSeriesData(days: number = 30) {
+    const now = new Date()
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+
+    // Get daily token creation stats
+    const tokenTimeSeries = await this.drizzle
+      .select({
+        date: sql<string>`DATE(${accessTokens.created_at})`,
+        totalCreated: count(),
+        activeCreated: count(sql`CASE WHEN ${accessTokens.expires_at} >= ${now} THEN 1 END`),
+      })
+      .from(accessTokens)
+      .where(and(gte(accessTokens.created_at, startDate), lte(accessTokens.created_at, now)))
+      .groupBy(sql`DATE(${accessTokens.created_at})`)
+      .orderBy(sql`DATE(${accessTokens.created_at})`)
+
+    // Get daily user registration stats
+    const userTimeSeries = await this.drizzle
+      .select({
+        date: sql<string>`DATE(${users.created_at})`,
+        totalRegistered: count(),
+      })
+      .from(users)
+      .where(and(gte(users.created_at, startDate), lte(users.created_at, now)))
+      .groupBy(sql`DATE(${users.created_at})`)
+      .orderBy(sql`DATE(${users.created_at})`)
+
+    // Get daily login activity stats
+    const loginTimeSeries = await this.drizzle
+      .select({
+        date: sql<string>`DATE(${users.last_login_at})`,
+        totalLogins: count(),
+      })
+      .from(users)
+      .where(
+        and(
+          sql`${users.last_login_at} IS NOT NULL`,
+          gte(users.last_login_at, startDate),
+          lte(users.last_login_at, now),
+        ),
+      )
+      .groupBy(sql`DATE(${users.last_login_at})`)
+      .orderBy(sql`DATE(${users.last_login_at})`)
+
+    // Fill in missing dates with zero values
+    const allDates: string[] = []
+    for (let i = 0; i < days; i++) {
+      const date = new Date(startDate)
+      date.setDate(date.getDate() + i)
+      allDates.push(date.toISOString().split('T')[0])
+    }
+
+    const timeSeriesData = allDates.map((date) => {
+      const tokenData = tokenTimeSeries.find((t) => t.date === date)
+      const userData = userTimeSeries.find((u) => u.date === date)
+      const loginData = loginTimeSeries.find((l) => l.date === date)
+
+      return {
+        date,
+        tokensCreated: tokenData?.totalCreated || 0,
+        activeTokensCreated: tokenData?.activeCreated || 0,
+        usersRegistered: userData?.totalRegistered || 0,
+        userLogins: loginData?.totalLogins || 0,
+      }
+    })
+
+    return timeSeriesData
+  }
+
+  /**
+   * Calculate percentage change compared to previous period
+   */
+  async getPercentageChanges() {
+    const now = new Date()
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+
+    // Current period (last 30 days)
+    const currentPeriod = await this.drizzle
+      .select({
+        totalTokens: count(),
+        activeTokens: count(sql`CASE WHEN ${accessTokens.expires_at} >= ${now} THEN 1 END`),
+        expiringSoon: count(
+          sql`CASE WHEN ${accessTokens.expires_at} BETWEEN ${now} AND ${sql`${now}::timestamp + INTERVAL '30 days'`} THEN 1 END`,
+        ),
+      })
+      .from(accessTokens)
+      .where(and(gte(accessTokens.created_at, thirtyDaysAgo), isNull(accessTokens.deleted_at)))
+
+    // Previous period (30-60 days ago)
+    const previousPeriod = await this.drizzle
+      .select({
+        totalTokens: count(),
+        activeTokens: count(sql`CASE WHEN ${accessTokens.expires_at} >= ${thirtyDaysAgo} THEN 1 END`),
+      })
+      .from(accessTokens)
+      .where(
+        and(
+          gte(accessTokens.created_at, sixtyDaysAgo),
+          lt(accessTokens.created_at, thirtyDaysAgo),
+          isNull(accessTokens.deleted_at),
+        ),
+      )
+
+    // User stats
+    const currentUsers = await this.drizzle
+      .select({ count: count() })
+      .from(users)
+      .where(gte(users.created_at, thirtyDaysAgo))
+
+    const previousUsers = await this.drizzle
+      .select({ count: count() })
+      .from(users)
+      .where(and(gte(users.created_at, sixtyDaysAgo), lt(users.created_at, thirtyDaysAgo)))
+
+    const calculateChange = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0
+      return ((current - previous) / previous) * 100
+    }
+
+    return {
+      totalTokensChange: calculateChange(currentPeriod[0]?.totalTokens || 0, previousPeriod[0]?.totalTokens || 0),
+      activeTokensChange: calculateChange(currentPeriod[0]?.activeTokens || 0, previousPeriod[0]?.activeTokens || 0),
+      expiringSoonChange: calculateChange(
+        currentPeriod[0]?.expiringSoon || 0,
+        0, // No previous comparison for expiring soon
+      ),
+      totalUsersChange: calculateChange(currentUsers[0]?.count || 0, previousUsers[0]?.count || 0),
+    }
+  }
+
+  async getComprehensiveDashboard(timeRange: 'week' | 'month' | 'quarter' = 'month') {
+    const days = timeRange === 'week' ? 7 : timeRange === 'month' ? 30 : 90
+
     const [
       overview,
       byStatus,
@@ -189,6 +327,8 @@ export class AnalyticsService {
       otpStats,
       activeUsersStats,
       needingNotification,
+      timeSeriesData,
+      percentageChanges,
     ] = await Promise.all([
       this.getTokenOverview(),
       this.getTokensByStatus(),
@@ -199,10 +339,14 @@ export class AnalyticsService {
       this.getOtpCodeStats(),
       this.getActiveUsersStats(),
       this.getTokensNeedingNotification(),
+      this.getTimeSeriesData(days),
+      this.getPercentageChanges(),
     ])
 
     return {
       otp: otpStats,
+      percentageChanges,
+      timeSeries: timeSeriesData,
       timestamp: new Date().toISOString(),
       tokens: {
         byService,

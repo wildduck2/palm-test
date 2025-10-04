@@ -107,18 +107,18 @@ const chartData = [
 const chartConfig = {
   desktop: {
     color: 'var(--chart-1)',
-    label: 'Desktop',
+    label: 'Active Tokens',
   },
   mobile: {
     color: 'var(--chart-2)',
-    label: 'Mobile',
+    label: 'Total Tokens',
   },
   visitors: {
     label: 'Visitors',
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive() {
+export function ChartAreaInteractive(data: TokenTimeSeries[]) {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState('30d')
 
